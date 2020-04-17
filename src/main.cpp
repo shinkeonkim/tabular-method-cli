@@ -18,6 +18,9 @@ unsigned int numOfDontcare;
 vector <int> minterm;
 vector <int> dontcare;
 vector<vector<rows>> termList;
+vector<rows> totalrow;
+vector<vector<int>> PIchart;
+
 
 vector <vector <string>> msg = {
     {"Enter the number of variables: ", "변수의 개수를 입력해주세요: "},
@@ -42,7 +45,7 @@ void deleteDuplicatedTermList();
 void setTermList();
 void tabularMethod();
 int termDiff(vector <int> V1, vector<int> V2);
-vector<vector<int>> grouping();
+void grouping();
 int countOne(vector<int> V);
 // bool compare(vector<int> V1, vector<int> V2);
 void makePIchart();
@@ -52,7 +55,7 @@ void inputErrorMsg();
 void testFunc();
 
 int main() {
-    // freopen("test.txt","r",stdin);
+    freopen("test.txt","r",stdin);
     // ios::sync_with_stdio(0);
     // cin.tie(0);
     // cout.tie(0);
@@ -155,35 +158,11 @@ void setTermList() {
 
 void tabularMethod() {
     grouping();
-//    vector<vector<int>> groupingResult = grouping();
+    makePIchart();
+    printPIchart();
 }
 
-void printTermList() {
-    for(int x=0; x<termList.size(); x++) {
-        if(termList[x].size() == 0) {
-            continue;
-        }
-        cout << x << "\n";
-        printLine(20);
-        for(int y=0; y<termList[x].size(); y++) {
-            cout<<"(";
-            for(int z1=0; z1<termList[x][y].minterms.size(); z1++) {
-                cout <<termList[x][y].minterms[z1];
-                if(z1 != termList[x][y].minterms.size() -1) cout << " ";
-            }
-            cout<<"): {";
-            for(int z2=0; z2<termList[x][y].expression.size(); z2++) {
-                cout <<termList[x][y].expression[z2];
-                if(z2 != termList[x][y].expression.size()-1) cout << " ";
-            }
-            cout<<"} \n";
-        }
-        printLine(20);
-    }
-    cout<<"\n\n";
-}
-
-vector<vector<int>> grouping() {
+void grouping() {
     printLine();
     int groupingCount = 2;
     cout << "# grouping 1\n";
@@ -274,6 +253,86 @@ vector<vector<int>> grouping() {
     }    
 }
 
+void makePIchart() {
+    for(int y =0; y< termList.size(); y++) {
+        for(int x=0; x <termList[y].size(); x++) {
+            totalrow.push_back(termList[y][x]);
+        }
+    }
+    PIchart.resize(totalrow.size());
+
+    for(int y=0; y<totalrow.size(); y++) {
+        for(int x=0; x<numOfMinterm; x++) {
+            int currentTerm = minterm[x];
+            bool check = false;
+            for(auto i : totalrow[y].minterms) {
+                if(i == currentTerm) {
+                    check = true;
+                }
+            }
+            if(check) {
+                PIchart[y].push_back(1);
+            }
+            else {
+                PIchart[y].push_back(0);
+            }
+        }
+    }
+}
+
+void printPIchart() {
+    cout<<"\n";
+    cout << "--------" <<"\t";
+    for(int x = 0; x<minterm.size(); x++) cout <<minterm[x]<<"\t";
+    cout<<"\n";
+    printLine(120);
+    
+    for(int y=0; y<PIchart.size(); y++) {
+        cout << "{";
+        for(int x=0; x<totalrow[y].minterms.size(); x++) {
+            cout << totalrow[y].minterms[x];
+            if(x != totalrow[y].minterms.size()-1) cout << " ";
+        }
+        cout << "}";
+        cout << "\t";
+
+        for(int x=0; x<PIchart.size(); x++ ) {
+            if(PIchart[y][x] == 1) {
+                cout << "X\t";
+            }
+            else {
+                cout <<" \t";
+            }
+        }
+        cout<<"\n";
+    }
+}
+
+void printTermList() {
+    for(int x=0; x<termList.size(); x++) {
+        if(termList[x].size() == 0) {
+            continue;
+        }
+        cout << x << "\n";
+        printLine(20);
+        for(int y=0; y<termList[x].size(); y++) {
+            cout<<"(";
+            for(int z1=0; z1<termList[x][y].minterms.size(); z1++) {
+                cout <<termList[x][y].minterms[z1];
+                if(z1 != termList[x][y].minterms.size() -1) cout << " ";
+            }
+            cout<<"): {";
+            for(int z2=0; z2<termList[x][y].expression.size(); z2++) {
+                cout <<termList[x][y].expression[z2];
+                if(z2 != termList[x][y].expression.size()-1) cout << " ";
+            }
+            cout<<"} \n";
+        }
+        printLine(20);
+    }
+    cout<<"\n\n";
+}
+
 int vectorDiff(vector <int> V1, vector<int> V2) {
     if(V1.size() != V2.size()) return -1;
     int ret = 0;
@@ -334,14 +393,6 @@ int countOne(vector<int> V) {
         if(i == 1) ret++;
     }
     return ret;
-}
-
-void makePIchart() {
-    
-}
-
-void printPIchart() {
-
 }
 
 bool mintermValidation() {
