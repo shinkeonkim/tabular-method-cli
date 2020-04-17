@@ -6,9 +6,9 @@
 using namespace std;
 
 int lang = 0;
-int numOfVar;
-int numOfMinterm;
-int numOfDontcare;
+unsigned int numOfVar;
+unsigned int numOfMinterm;
+unsigned int numOfDontcare;
 vector <int> minterm;
 vector <int> dontcare;
 
@@ -18,7 +18,8 @@ vector <vector <string>> msg = {
     {"Enter the minterms such as example.\n", "아래 예시처럼 minterm들을 입력해주세요."},
     {"Ex: 0 3 9 7\n", "예시: 0 3 9 7\n"},
     {"Enter: ", "입력: "},
-    {"Enter the number of don't care", "don't care에 해당하는 수들을 입력해주세요."},
+    {"Enter the number of `don'tcares`.: ", "don't care의 개수를 입력해주세요.: "},
+    {"Enter the number of `don't care`\n", "don't care에 해당하는 수들을 입력해주세요.\n"},
 };
 
 void inputLanguage(); // input language number
@@ -88,20 +89,22 @@ bool inputNumbers() {
         minterm.push_back(input);
     }
 
-    mintermValidation();
-    
+    if(!mintermValidation()) return false;
     cout << msg[5][lang];
-    cout << msg[4][lang];
-    for(int x=0; x<numOfDontcare; x++) {
-        cin >> input;
-        dontcare.push_back(input);
+    cin >> numOfDontcare;
+    if(numOfDontcare > 0) {
+        cout << msg[6][lang];
+        cout << msg[4][lang];
+
+        for(int x=0; x<numOfDontcare; x++) {
+            cin >> input;
+            dontcare.push_back(input);
+        }
+
+        if(!dontcareValidation()) return false;
     }
-
-    dontcareValidation();
-
+    return true;
 }
-
-
 
 void tabularMethod() {
 
@@ -120,14 +123,29 @@ void printPIchart() {
 }
 
 bool mintermValidation() {
+    unsigned int checkNumber = 1 << numOfVar;
+    for(auto i : minterm) {
+        if(i >= checkNumber) return false;
+    }
     return true;
 }
 bool dontcareValidation() {
+    unsigned int checkNumber = 1 << numOfVar;
+    for(auto i : dontcare) {
+        if(i >= checkNumber) return false;
+    }
     return true;
 }
 
 void testFunc() {
-    cout << numOfVar << " " <<numOfMinterm << "\n"; 
+    cout << numOfVar << " " <<numOfMinterm << " " << numOfDontcare <<"\nminterm: ";
+    for(auto i : minterm) {
+        cout << i << " ";
+    } 
+    cout << "\ndontcare: ";
+    for(auto i : dontcare) {
+        cout << i << " ";
+    }
 }
 
 void inputErrorMsg() {
