@@ -32,6 +32,7 @@ bool dontcareValidation();
 
 void tabularMethod();
 vector<vector<int>> grouping();
+bool compare(vector<int> V1, vector<int> V2);
 void makePIchart();
 void printPIchart();
 
@@ -116,7 +117,30 @@ void tabularMethod() {
    }
 }
 
+bool compare(vector<int> V1, vector<int> V2) {
+    unsigned int c1 = 0,cnt1=0;
+    unsigned int c2 = 0,cnt2=0;
+    for(int x=0; x<V1.size(); x++) {
+        if(V1[x] == 1) cnt1++;
+        c1*=2;
+        c1 += (V1[x]%2);
+    }
+    for(int x=0; x<V2.size(); x++) {
+        if(V2[x] == 1) cnt2++;
+        c2*=2;
+        c2 += (V2[x]%2);
+    }
+    if(cnt1 < cnt2) {
+        return true;
+    }
+    else if(cnt1 == cnt2) {
+        if(c1 < c2) return true;
+    }
+    return false;
+}
+
 vector<vector<int>> grouping() {
+    printLine();
     vector<vector<int>> ret;
     for(int x=0; x<numOfMinterm; x++) {
         vector<int> I;
@@ -134,8 +158,15 @@ vector<vector<int>> grouping() {
         }
     }
 
+    sort(ret.begin(), ret.end(), compare);
+
+    printLine();
+    
     int count = 0;
     while(true) {
+
+
+        printLine();    
         if(count==0) break;
     }
 
