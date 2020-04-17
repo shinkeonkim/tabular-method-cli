@@ -5,12 +5,19 @@
 
 using namespace std;
 
+struct PI {
+    vector <int> minterms;
+    vector <int> expression;
+};
+
+
 int lang = 0;
 unsigned int numOfVar;
 unsigned int numOfMinterm;
 unsigned int numOfDontcare;
 vector <int> minterm;
 vector <int> dontcare;
+vector<vector<PI>> termList;
 
 vector <vector <string>> msg = {
     {"Enter the number of variables: ", "변수의 개수를 입력해주세요: "},
@@ -30,6 +37,7 @@ bool inputNumbers(); // input numbers
 bool mintermValidation();
 bool dontcareValidation();
 
+void setTermList();
 void tabularMethod();
 vector<vector<int>> grouping();
 int countOne(vector<int> V);
@@ -52,6 +60,7 @@ int main() {
         return 0;
     }
 
+    setTermList();
     tabularMethod();
 
     testFunc();
@@ -110,101 +119,67 @@ bool inputNumbers() {
     return true;
 }
 
+void setTermList() {
+    termList.resize(numOfVar+1);
+    for(int y=0; y<numOfMinterm; y++) {
+        vector<int> tmp(numOfVar+1);
+        int idx = numOfVar;
+        unsigned int current = minterm[y];
+
+        while(current > 0 && idx >=0) {
+            tmp[idx] = current % 2;
+            current/=2;
+            idx--;
+        }
+        int cnt = countOne(tmp);
+        termList[cnt].push_back({{minterm[y]},tmp});
+    }
+    for(int y=0; y<numOfDontcare; y++) {
+        vector<int> tmp(numOfVar+1);
+        int idx = numOfVar;
+        unsigned int current = dontcare[y];
+
+        while(current > 0 && idx >=0) {
+            tmp[idx] = current % 2;
+            current/=2;
+            idx--;
+        }
+        int cnt = countOne(tmp);
+        termList[cnt].push_back({{dontcare[y]},tmp});
+    }
+}
+
+
 void tabularMethod() {
     grouping();
 //    vector<vector<int>> groupingResult = grouping();
 }
 
-/*
-bool compare(vector<int> V1, vector<int> V2) {
-    unsigned int c1 = 0,cnt1=0;
-    unsigned int c2 = 0,cnt2=0;
-    for(int x=0; x<V1.size(); x++) {
-        if(V1[x] == 1) cnt1++;
-        c1*=2;
-        c1 += (V1[x]%2);
-    }
-    for(int x=0; x<V2.size(); x++) {
-        if(V2[x] == 1) cnt2++;
-        c2*=2;
-        c2 += (V2[x]%2);
-    }
-    if(cnt1 < cnt2) {
-        return true;
-    }
-    else if(cnt1 == cnt2) {
-        if(c1 < c2) return true;
-    }
-    return false;
-}*/
-
 vector<vector<int>> grouping() {
     printLine();
     cout << "# grouping 1\n";
-    vector<vector<int>> ret;
-    vector<vector<vector<int>>> groupResult(numOfVar+1);
-
-    for(int x=0; x<numOfMinterm + numOfDontcare; x++) {
-        vector<int> I;
-        for(int x=0; x<numOfVar; x++) I.push_back(0);
-        ret.push_back(I);
-    }
-
-    for(int y=0; y<numOfMinterm; y++) {
-        unsigned int current = minterm[y];
-        int idx = numOfVar-1;
-        while(current > 0 && idx >=0) {
-            ret[y][idx] = current % 2;
-            current/=2;
-            idx--;
+    for(int x=0; x<termList.size(); x++) {
+        if(termList[x].size() == 0) {
+            continue;
         }
-    }
-
-    for(int y=numOfMinterm; y<numOfMinterm+numOfDontcare; y++) {
-        unsigned int current = dontcare[y - numOfMinterm];
-        int idx = numOfVar-1;
-        while(current > 0 && idx >=0) {
-            ret[y][idx] = current % 2;
-            current/=2;
-            idx--;
-        }
-    }
-    
-
-    for(int y =0; y<numOfMinterm + numOfDontcare; y++) {
-        int c = countOne(ret[y]);
-        groupResult[c].push_back(ret[y]);
-    }
-    
-    printLine(10);
-    for(int y=0; y<groupResult.size(); y++) {
-        for(int x = 0; x<groupResult[y].size(); x++) {
-            cout << "{ ";
-            for(int z =0; z<groupResult[y][x].size(); z++) {
-                cout << groupResult[y][x][z] << " ";
+        cout << x << "\n";
+        printLine(20);
+        for(int y=0; y<termList[x].size(); y++) {
+            cout<<"(";
+            for(int z1=0; z1<termList[x][y].minterms.size(); z1++) {
+                cout <<termList[x][y].minterms[z1];
+                if(z1 != termList[x][y].minterms.size() -1) cout << " ";
             }
-            cout<<"}";
+            cout<<"): {";
+            for(int z2=0; z2<termList[x][y].expression.size(); z2++) {
+                cout <<termList[x][y].expression[z2];
+                if(z2 != termList[x][y].expression.size()-1) cout << " ";
+            }
+            cout<<"} \n";
         }
-        if(groupResult[y].size() > 0) {
-            cout <<"\n";
-            printLine(10);
-        }
+        printLine(20);
     }
-
-    cout << "\n";
-
-    int count = 0;
-    int idx = 2;
-    while(true) {
-        cout << "# grouping "<<idx<<"\n";
-
-
-        if(count==0) break;
-        idx++;
-        count = 0;
-    }
-
-    return ret;
+    
 }
 
 int countOne(vector<int> V) {
