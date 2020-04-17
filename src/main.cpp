@@ -37,8 +37,10 @@ bool inputNumbers(); // input numbers
 bool mintermValidation();
 bool dontcareValidation();
 
+void printTermList();
 void setTermList();
 void tabularMethod();
+int termDiff(vector <int> V1, vector<int> V2);
 vector<vector<int>> grouping();
 int countOne(vector<int> V);
 // bool compare(vector<int> V1, vector<int> V2);
@@ -120,10 +122,10 @@ bool inputNumbers() {
 }
 
 void setTermList() {
-    termList.resize(numOfVar+1);
+    termList.resize(1 << (numOfVar-1));
     for(int y=0; y<numOfMinterm; y++) {
-        vector<int> tmp(numOfVar+1);
-        int idx = numOfVar;
+        vector<int> tmp(numOfVar);
+        int idx = numOfVar-1;
         unsigned int current = minterm[y];
 
         while(current > 0 && idx >=0) {
@@ -135,8 +137,8 @@ void setTermList() {
         termList[cnt].push_back({{minterm[y]},tmp});
     }
     for(int y=0; y<numOfDontcare; y++) {
-        vector<int> tmp(numOfVar+1);
-        int idx = numOfVar;
+        vector<int> tmp(numOfVar);
+        int idx = numOfVar-1;
         unsigned int current = dontcare[y];
 
         while(current > 0 && idx >=0) {
@@ -155,9 +157,7 @@ void tabularMethod() {
 //    vector<vector<int>> groupingResult = grouping();
 }
 
-vector<vector<int>> grouping() {
-    printLine();
-    cout << "# grouping 1\n";
+void printTermList() {
     for(int x=0; x<termList.size(); x++) {
         if(termList[x].size() == 0) {
             continue;
@@ -179,7 +179,108 @@ vector<vector<int>> grouping() {
         }
         printLine(20);
     }
+    cout<<"\n\n";
+}
+
+vector<vector<int>> grouping() {
+    printLine();
+    int groupingCount = 2;
+    cout << "# grouping 1\n";
+    printLine();
+    printTermList();
+
+    int grouping = 0;
+    while(true) {
+        vector<vector<PI>> currentTermList(numOfVar);
+        vector<vector<bool>> check(termList.size());
+        for(int y=0; y<termList.size(); y++) {
+            for(int x=0; x<termList[y].size(); x++) check[y].push_back(true);
+        }
+        for(int y =0; y < termList.size(); y++) {
+            if(termList[y].size() == 0) continue;
+            if(y+1 < termList.size()) {
+                for(int x1=0; x1<termList[y].size(); x1++) {
+                    for(int x2=0; x2<termList[y+1].size(); x2++) {
+                        int diff = termDiff(termList[y][x1].expression, termList[y+1][x2].expression);
+                        // cout << y << " " << x1 << ": " << y+1 << " " << x2 << " " << diff <<"\n";
+                        if(diff == 1) {
+                            grouping++;
+                            check[y][x1] = false;
+                            check[y+1][x2] = false;
+                            vector<int> e;
+                            vector<int> t;
+                            for(int z=0; z<termList[y][x1].expression.size(); z++) {
+                                if(termList[y][x1].expression[z] != termList[y+1][x2].expression[z] && termList[y][x1].expression[z] + termList[y+1][x2].expression[z] ==1) {
+                                    e.push_back(2);
+                                }
+                                else {
+                                    e.push_back(termList[y][x1].expression[z]);
+                                }
+                            }
+
+                            for(int z=0; z<termList[y][x1].minterms.size(); z++) {
+                                t.push_back(termList[y][x1].minterms[z]);
+                            }
+
+                            for(int z2=0; z2 < termList[y+1][x2].minterms.size(); z2++) {
+                                int check = true;
+                                for(int z=0; z<termList[y][x1].minterms.size(); z++) {                                
+                                    if(termList[y][x1].minterms[z] == termList[y+1][x2].minterms[z2]) {
+                                        check= false;
+                                    }
+                                }
+                                if(check) {
+                                    t.push_back(termList[y+1][x2].minterms[z2]);
+                                }
+                            }
+
+                            int oneCount = countOne(e);
+                            currentTermList[oneCount].push_back({t,e});
+                        }
+                    }
+                    if(check[y][x1]) {
+                        currentTermList[y].push_back(termList[y][x1]);
+                    }
+                }
+            }
+            else {
+                for(int x=0; x<termList[y].size(); x++) {
+                    if(check[y][x]) {
+                        int count = countOne(termList[y][x].expression);
+                        currentTermList[count].push_back({termList[y][x].minterms,termList[y][x].expression});
+                    }
+                }
+            }
+
+        }
+
+        termList = currentTermList;
+
+        printLine();    
+        cout << "# grouping "<<groupingCount <<"\n";    
+        printLine();
+        
+        if(grouping == 0) {
+            cout << "No more grouping\n";
+            break;
+        }
     
+        printTermList();
+        grouping = 0;
+        groupingCount++;
+    }
+
+
+    
+}
+
+
+int termDiff(vector<int> V1, vector<int> V2) {
+    int k = 0;
+    for(int x=0; x<V1.size(); x++) {
+        if(V1[x] != V2[x] && V1[x] + V2[x] == 1) k++;
+    }
+    return k;
 }
 
 int countOne(vector<int> V) {
