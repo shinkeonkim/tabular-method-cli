@@ -5,7 +5,7 @@
 
 using namespace std;
 
-struct PI {
+struct rows {
     vector <int> minterms;
     vector <int> expression;
 };
@@ -17,7 +17,7 @@ unsigned int numOfMinterm;
 unsigned int numOfDontcare;
 vector <int> minterm;
 vector <int> dontcare;
-vector<vector<PI>> termList;
+vector<vector<rows>> termList;
 
 vector <vector <string>> msg = {
     {"Enter the number of variables: ", "변수의 개수를 입력해주세요: "},
@@ -38,6 +38,7 @@ bool mintermValidation();
 bool dontcareValidation();
 
 void printTermList();
+void deleteDuplicatedTermList();
 void setTermList();
 void tabularMethod();
 int termDiff(vector <int> V1, vector<int> V2);
@@ -191,7 +192,7 @@ vector<vector<int>> grouping() {
 
     int grouping = 0;
     while(true) {
-        vector<vector<PI>> currentTermList(numOfVar);
+        vector<vector<rows>> currentTermList(numOfVar);
         vector<vector<bool>> check(termList.size());
         for(int y=0; y<termList.size(); y++) {
             for(int x=0; x<termList[y].size(); x++) check[y].push_back(true);
@@ -256,10 +257,12 @@ vector<vector<int>> grouping() {
 
         termList = currentTermList;
 
+        deleteDuplicatedTermList();
+
         printLine();    
         cout << "# grouping "<<groupingCount <<"\n";    
         printLine();
-        
+
         if(grouping == 0) {
             cout << "No more grouping\n";
             break;
@@ -268,14 +271,56 @@ vector<vector<int>> grouping() {
         printTermList();
         grouping = 0;
         groupingCount++;
+    }    
+}
+
+int vectorDiff(vector <int> V1, vector<int> V2) {
+    if(V1.size() != V2.size()) return -1;
+    int ret = 0;
+    for(int x=0; x<V1.size(); x++) {
+        if(V1[x] != V2[x]) {
+            ret++;
+        }
+    }
+    return ret;
+}
+
+void deleteDuplicatedTermList() {
+    for(int y =0; y<termList.size(); y++) {
+        for(int x=0; x< termList[y].size(); x++) {
+            vector<int> Z = termList[y][x].minterms;
+            sort(Z.begin(), Z.end());
+            vector<int> Z2;
+            Z2.push_back(Z[0]);
+            for(int x=1; x<Z.size(); x++) {
+                if(Z[x-1] != Z[x]) Z2.push_back(Z[x]);
+            }
+            termList[y][x].minterms = Z2;
+        }
     }
 
-
-    
+    vector<vector<rows>> ret;
+    for(int y=0; y<termList.size(); y++) {
+        vector<rows> partialRet;
+        for(int x1=0; x1<termList[y].size(); x1++) {
+            int sameCount = 0;
+            for(int x2=x1+1; x2<termList[y].size(); x2++) {
+                if(vectorDiff(termList[y][x1].minterms,termList[y][x2].minterms) == 0) {
+                    sameCount++;
+                }
+            }
+            if(sameCount ==0) {
+                partialRet.push_back(termList[y][x1]);
+            }
+        } 
+        ret.push_back(partialRet);
+    }
+    termList = ret;
 }
 
 
 int termDiff(vector<int> V1, vector<int> V2) {
+    if(V1.size() != V2.size()) return 1000;
     int k = 0;
     for(int x=0; x<V1.size(); x++) {
         if(V1[x] != V2[x] && V1[x] + V2[x] == 1) k++;
