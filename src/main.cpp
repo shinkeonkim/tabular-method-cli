@@ -31,7 +31,7 @@ bool mintermValidation();
 bool dontcareValidation();
 
 void tabularMethod();
-void grouping();
+vector<vector<int>> grouping();
 void makePIchart();
 void printPIchart();
 
@@ -107,11 +107,39 @@ bool inputNumbers() {
 }
 
 void tabularMethod() {
-
+   vector<vector<int>> groupingResult = grouping();
+   for(int x=0; x<groupingResult.size(); x++) {
+       for(int y=0; y<groupingResult[x].size(); y++) {
+           cout <<groupingResult[x][y] << " ";
+       }
+       cout<<"\n";
+   }
 }
 
-void grouping() {
+vector<vector<int>> grouping() {
+    vector<vector<int>> ret;
+    for(int x=0; x<numOfMinterm; x++) {
+        vector<int> I;
+        for(int x=0; x<numOfVar; x++) I.push_back(0);
+        ret.push_back(I);
+    }
 
+    for(int y=0; y<numOfMinterm; y++) {
+        unsigned int current = minterm[y];
+        int idx = numOfVar-1;
+        while(current > 0 && idx >=0) {
+            ret[y][idx] = current % 2;
+            current/=2;
+            idx--;
+        }
+    }
+
+    int count = 0;
+    while(true) {
+        if(count==0) break;
+    }
+
+    return ret;
 }
 
 void makePIchart() {
@@ -127,12 +155,23 @@ bool mintermValidation() {
     for(auto i : minterm) {
         if(i >= checkNumber) return false;
     }
+    for(int x=0; x<minterm.size(); x++) {
+        for(int y=x+1; y<minterm.size(); y++) {
+            if(minterm[x] == minterm[y]) return false;
+        }
+    }
     return true;
 }
 bool dontcareValidation() {
     unsigned int checkNumber = 1 << numOfVar;
     for(auto i : dontcare) {
         if(i >= checkNumber) return false;
+    }
+    
+    for(int x=0; x<dontcare.size(); x++) {
+        for(int y=x+1; y<dontcare.size(); y++) {
+            if(dontcare[x] == dontcare[y]) return false;
+        }
     }
 
     for(auto i : dontcare) {
@@ -145,7 +184,7 @@ bool dontcareValidation() {
 }
 
 void testFunc() {
-    cout << numOfVar << " " <<numOfMinterm << " " << numOfDontcare <<"\nminterm: ";
+    cout << "numOfVar: " <<numOfVar << "\nnumOfMinterm: " <<numOfMinterm << "\nnumOfDontcare:  " << numOfDontcare <<"\nminterm: ";
     for(auto i : minterm) {
         cout << i << " ";
     } 
