@@ -134,6 +134,13 @@ bool dontcareValidation() {
     for(auto i : dontcare) {
         if(i >= checkNumber) return false;
     }
+
+    for(auto i : dontcare) {
+        for(auto j : minterm) {
+            if(i == j) return false;
+        }
+    }
+
     return true;
 }
 
