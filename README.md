@@ -20,7 +20,19 @@ main.cpp를 g++ 컴파일러로 컴파일/실행해주세요.
 ## picture
 
 ### 실행 화면 1
+- KOR/ENG version
+    - KOR
+        - <img src = "./img/KOR-version.JPG">
+    - ENG
+        - <img src = "./img/ENG-version.JPG">
 
-### 실행 화면 2
+### 실행 화면 예시
 
-### 실행 화면 3
+#### 1
+<img src = "./img/ex1.JPG">
+
+#### 2
+<img src = "./img/ex2.JPG">
+
+#### 3
+<img src = "./img/ex3.JPG">
