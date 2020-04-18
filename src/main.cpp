@@ -67,6 +67,7 @@ void derivecheckedPI();
 
 void printMinterm(vector <int> V);
 void printExpression(vector <int> V);
+void printfinalExpression(vector <int> V);
 void inputErrorMsg();
 void testFunc();
 
@@ -85,7 +86,7 @@ int main() {
     setTermList();
     tabularMethod();
 
-    testFunc();
+    // testFunc();
 }
 
 void printLine() {
@@ -203,7 +204,6 @@ void grouping() {
                 for(int x1=0; x1<termList[y].size(); x1++) {
                     for(int x2=0; x2<termList[y+1].size(); x2++) {
                         int diff = termDiff(termList[y][x1].expression, termList[y+1][x2].expression);
-                        // cout << y << " " << x1 << ": " << y+1 << " " << x2 << " " << diff <<"\n";
                         if(diff == 1) {
                             grouping++;
                             check[y][x1] = false;
@@ -211,7 +211,7 @@ void grouping() {
                             vector<int> e;
                             vector<int> t;
                             for(int z=0; z<termList[y][x1].expression.size(); z++) {
-                                if(termList[y][x1].expression[z] != termList[y+1][x2].expression[z] && termList[y][x1].expression[z] + termList[y+1][x2].expression[z] ==1) {
+                                if(termList[y][x1].expression[z] != termList[y+1][x2].expression[z] && termList[y][x1].expression[z] + termList[y+1][x2].expression[z] == 1) {
                                     e.push_back(2);
                                 }
                                 else {
@@ -241,6 +241,7 @@ void grouping() {
                     }
                     if(check[y][x1]) {
                         currentTermList[y].push_back(termList[y][x1]);
+                        check[y][x1] = false;
                     }
                 }
             }
@@ -302,6 +303,9 @@ void makePIchart() {
 }
 
 void printPIchart() {
+    cout<<"\n";
+    printLine();
+    cout << "PIchart\n";
     cout<<"\n";
     cout << "\t";
     for(int x = 0; x<minterm.size(); x++) cout <<minterm[x]<<"\t";
@@ -394,8 +398,23 @@ void printEPInPI() {
 
 void findlogic() {
     PIdfs(0);
-    for(auto i : ansCheck) {
-        cout << i << " ";
+    int last = 0;
+    for(int x =0; x<ansCheck.size(); x++) {
+        if(ansCheck[x] != 0) {
+            last = x;
+        }
+    }
+    cout << "final logic: ";
+    for(int x =0; x<ansCheck.size(); x++) {
+        if(ansCheck[x] != 0) {
+            if(last != x) {
+                printfinalExpression(totalrow[x].expression);
+                cout <<"+";
+            }
+            else {
+                printfinalExpression(totalrow[x].expression);
+            }
+        }
     }
     
 }
@@ -524,7 +543,7 @@ int termDiff(vector<int> V1, vector<int> V2) {
     if(V1.size() != V2.size()) return 1000;
     int k = 0;
     for(int x=0; x<V1.size(); x++) {
-        if(V1[x] != V2[x] && V1[x] + V2[x] == 1) k++;
+        if(V1[x] != V2[x]) k++;
     }
     return k;
 }
@@ -588,6 +607,16 @@ void printExpression(vector <int> V) {
         }
         else {
             cout<<"-";
+        }
+    }
+}
+void printfinalExpression(vector <int> V) {
+    for(int x=0; x<V.size(); x++) {
+        if(V[x] == 0) {
+            cout << (char)(x+97) << "'";
+        }
+        else if(V[x] == 1) {
+            cout << (char)(x+97);
         }
     }
 }
