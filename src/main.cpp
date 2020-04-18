@@ -20,6 +20,9 @@ vector <int> dontcare;
 vector<vector<rows>> termList;
 vector<rows> totalrow;
 vector<vector<int>> PIchart;
+vector <rows> EPI;
+vector <rows> PI;
+vector <int> checkPI;
 
 
 vector <vector <string>> msg = {
@@ -30,6 +33,8 @@ vector <vector <string>> msg = {
     {"Enter: ", "입력: "},
     {"Enter the number of `don'tcares`: ", "don't care의 개수를 입력해주세요: "},
     {"Enter the number of `don't care`\n", "don't care에 해당하는 수들을 입력해주세요.\n"},
+    {"NO EPI\n","EPI가 없습니다.\n"},
+    {"NO PI\n", "PI가 없습니다.\n"},
 };
 
 void inputLanguage(); // input language number
@@ -50,7 +55,14 @@ int countOne(vector<int> V);
 // bool compare(vector<int> V1, vector<int> V2);
 void makePIchart();
 void printPIchart();
+void findEPInPI();
+void printEPInPI();
+void findlogic();
+void PIdfs(int idx);
+void derivecheckedPI();
 
+void printMinterm(vector <int> V);
+void printExpression(vector <int> V);
 void inputErrorMsg();
 void testFunc();
 
@@ -160,6 +172,9 @@ void tabularMethod() {
     grouping();
     makePIchart();
     printPIchart();
+    findEPInPI();
+    printEPInPI();
+    findlogic();
 }
 
 void grouping() {
@@ -296,7 +311,7 @@ void printPIchart() {
         cout << "}";
         cout << "\t";
 
-        for(int x=0; x<PIchart.size(); x++ ) {
+        for(int x=0; x<PIchart[y].size(); x++ ) {
             if(PIchart[y][x] == 1) {
                 cout << "X\t";
             }
@@ -308,6 +323,101 @@ void printPIchart() {
     }
 }
 
+
+void findEPInPI() {
+    checkPI.resize(PIchart.size());
+    vector <bool> check(PIchart.size());
+    for(int x = 0; x < numOfMinterm; x++) {
+        int count = 0;
+        int pos = 0;
+        for(int y=0; y<PIchart.size(); y++) {
+            if(PIchart[y][x] == 1) {
+                count++;
+                pos = y;
+            }
+        }
+        if(count == 1) {
+            check[pos] = 1;
+        }
+    }
+    for(int x=0; x<PIchart.size(); x++) {
+        if(check[x] == 1) {
+            EPI.push_back(totalrow[x]);
+            checkPI[x] = 2;
+        }
+        else {
+            PI.push_back(totalrow[x]);
+        }
+    }
+
+}
+
+void printEPInPI() {
+    printLine();
+    cout << "EPI\n" ;
+    printLine();
+    if(EPI.size() == 0) {
+        cout << msg[7][lang];
+    }
+    else {
+        for(int x=0; x<EPI.size(); x++) {
+            printMinterm(EPI[x].minterms);
+            cout << " ";
+            printExpression(EPI[x].expression);
+            cout<<"\n";
+        }
+    }
+    printLine();
+    cout<<"\n";
+    printLine();
+    cout << "PI\n" ;
+    printLine();
+    if(PI.size() == 0) {
+        cout << msg[8][lang];
+    }
+    else {
+        for(int x=0; x<PI.size(); x++) {
+            printMinterm(PI[x].minterms);
+            cout << " ";
+            printExpression(PI[x].expression);
+            cout<<"\n";
+        }
+    }
+    printLine();
+}
+
+void findlogic() {
+    PIdfs(0);
+    
+}
+
+void derivecheckedPI() {
+    
+}
+
+void PIdfs(int idx) {
+    if(idx == PI.size()) {
+        if(checkPI[idx] == 2) {
+            derivecheckedPI();
+        }
+        else {
+            for(int x=0; x<2; x++) {
+                checkPI[idx] = x;
+                derivecheckedPI();
+            }
+        }
+    }
+    if(checkPI[idx] == 2) {
+        PIdfs(idx+1);
+    }
+    else {
+        for(int x=0; x<2; x++) {
+            checkPI[idx] = x;
+            derivecheckedPI();
+        }
+    }
+}
+
 void printTermList() {
     for(int x=0; x<termList.size(); x++) {
         if(termList[x].size() == 0) {
@@ -316,17 +426,10 @@ void printTermList() {
         cout << x << "\n";
         printLine(20);
         for(int y=0; y<termList[x].size(); y++) {
-            cout<<"(";
-            for(int z1=0; z1<termList[x][y].minterms.size(); z1++) {
-                cout <<termList[x][y].minterms[z1];
-                if(z1 != termList[x][y].minterms.size() -1) cout << " ";
-            }
-            cout<<"): {";
-            for(int z2=0; z2<termList[x][y].expression.size(); z2++) {
-                cout <<termList[x][y].expression[z2];
-                if(z2 != termList[x][y].expression.size()-1) cout << " ";
-            }
-            cout<<"} \n";
+            printMinterm(termList[x][y].minterms);
+            cout << " ";
+            printExpression(termList[x][y].expression);
+            cout<< "\n";
         }
         printLine(20);
     }
@@ -426,6 +529,28 @@ bool dontcareValidation() {
     }
 
     return true;
+}
+
+void printMinterm(vector <int> V) {
+    cout << "(";
+    for(int x=0; x<V.size(); x++) {
+        cout << V[x];
+        if(x!= V.size() -1) cout << " ";
+    }
+    cout << ")";
+}
+void printExpression(vector <int> V) {
+    for(int x=0; x<V.size(); x++) {
+        if(V[x] == 0) {
+            cout << (char)(x+97) << "'";
+        }
+        else if(V[x] == 1) {
+            cout << (char)(x+97);
+        }
+        else {
+            cout<<"-";
+        }
+    }
 }
 
 void testFunc() {
