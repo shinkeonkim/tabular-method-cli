@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <map>
 #include <string>
 
 using namespace std;
@@ -23,7 +24,10 @@ vector<vector<int>> PIchart;
 vector <rows> EPI;
 vector <rows> PI;
 vector <int> checkPI;
-
+map <int, int> M;
+int ansCount = (int)1e8;
+int ansSizeSum = -1;
+vector <int> ansCheck;
 
 vector <vector <string>> msg = {
     {"Enter the number of variables: ", "변수의 개수를 입력해주세요: "},
@@ -117,6 +121,7 @@ bool inputNumbers() {
     for(int x = 0; x<numOfMinterm; x++) {
         cin >> input;
         minterm.push_back(input);
+        M[input] = x;
     }
 
     if(!mintermValidation()) return false;
@@ -130,6 +135,7 @@ bool inputNumbers() {
         for(int x=0; x<numOfDontcare; x++) {
             cin >> input;
             dontcare.push_back(input);
+            M[input] = -1;
         }
 
         if(!dontcareValidation()) return false;
@@ -297,7 +303,7 @@ void makePIchart() {
 
 void printPIchart() {
     cout<<"\n";
-    cout << "--------" <<"\t";
+    cout << "\t";
     for(int x = 0; x<minterm.size(); x++) cout <<minterm[x]<<"\t";
     cout<<"\n";
     printLine(120);
@@ -388,15 +394,45 @@ void printEPInPI() {
 
 void findlogic() {
     PIdfs(0);
+    for(auto i : ansCheck) {
+        cout << i << " ";
+    }
     
 }
 
 void derivecheckedPI() {
+    vector <bool> mintermCheck(numOfMinterm);
+    int count = 0;
+    int sizeSum = 0;
+    for(int y=0; y< checkPI.size(); y++) {
+        if(checkPI[y] != 0) {
+            count++;
+            sizeSum += totalrow[y].minterms.size();
+            for(int x = 0; x< totalrow[y].minterms.size(); x++) {
+                if(M[totalrow[y].minterms[x]] != -1)
+                    mintermCheck[M[totalrow[y].minterms[x]]] = true;
+            }
+        }
+    }
+
+    for(int x=0; x<numOfMinterm; x++) {
+        if(!mintermCheck[x]) return;
+    }
     
+    if(ansCount > count) {
+        if(ansSizeSum <= sizeSum) {
+            ansCount = count;
+            ansSizeSum = sizeSum;
+            ansCheck.clear();
+            for(auto i : checkPI) {
+                ansCheck.push_back(i);
+            }
+        }
+    }
 }
 
 void PIdfs(int idx) {
-    if(idx == PI.size()) {
+    if(idx == PIchart.size()) {
         if(checkPI[idx] == 2) {
             derivecheckedPI();
         }
@@ -407,14 +443,17 @@ void PIdfs(int idx) {
             }
         }
     }
-    if(checkPI[idx] == 2) {
-        PIdfs(idx+1);
-    }
     else {
-        for(int x=0; x<2; x++) {
-            checkPI[idx] = x;
-            derivecheckedPI();
+        if(checkPI[idx] == 2) {
+            PIdfs(idx+1);
         }
+        else {
+            for(int x=0; x<2; x++) {
+                checkPI[idx] = x;
+                PIdfs(idx+1);
+            }
+        }
+
     }
 }
 
