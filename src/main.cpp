@@ -72,7 +72,7 @@ void inputErrorMsg();
 void testFunc();
 
 int main() {
-    freopen("test.txt","r",stdin);
+    // freopen("test.txt","r",stdin);
     // ios::sync_with_stdio(0);
     // cin.tie(0);
     // cout.tie(0);
@@ -85,8 +85,6 @@ int main() {
 
     setTermList();
     tabularMethod();
-
-    // testFunc();
 }
 
 void printLine() {
